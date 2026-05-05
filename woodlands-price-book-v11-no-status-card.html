@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Woodlands Price Book</title>
+  <style>
+    :root{
+      --bg:#f6f3ec;
+      --panel:#ffffff;
+      --panel-2:#fbfaf6;
+      --ink:#1d211c;
+      --muted:#666f62;
+      --line:#ded8cc;
+      --green:#28543a;
+      --green-dark:#1d3f2b;
+      --green-2:#e8f0e8;
+      --tan:#d9c7a5;
+      --warn:#7a3f13;
+      --warn-bg:#fff0df;
+      --shadow:0 10px 28px rgba(38,34,24,.08);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(40,84,58,.11), transparent 34rem),
+        var(--bg);
+      color:var(--ink);
+    }
+
+    .shell{
+      width:min(1180px, calc(100% - 28px));
+      margin:0 auto;
+    }
+
+    header{
+      padding:22px 0 14px;
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:linear-gradient(to bottom, rgba(246,243,236,.98), rgba(246,243,236,.92));
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(222,216,204,.85);
+    }
+
+    .brand-row{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .eyebrow{
+      margin:0 0 4px;
+      color:var(--green);
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(1.45rem, 4vw, 2.4rem);
+      letter-spacing:-.04em;
+      line-height:1;
+    }
+
+    .header-actions{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:8px;
+    }
+
+    .mode-card{
+      min-width:410px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:999px;
+      box-shadow:var(--shadow);
+      padding:5px;
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:5px;
+    }
+
+    .mode-card button{
+      border:0;
+      border-radius:999px;
+      background:transparent;
+      color:var(--muted);
+      padding:12px 12px;
+      font-size:.95rem;
+      font-weight:850;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .mode-card button.active{
+      color:#fff;
+      background:var(--green);
+      box-shadow:0 6px 16px rgba(40,84,58,.22);
+    }
+
+    body.wholesale-active header{
+      border-bottom:2px solid rgba(40,84,58,.45);
+    }
+
+    body.wholesale-active .mode-card button.active{
+      background:var(--green-dark);
+    }
+
+    .controls{
+      display:grid;
+      grid-template-columns:1fr 46px;
+      gap:10px;
+      align-items:center;
+    }
+
+    input, select{
+      width:100%;
+      min-height:46px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:var(--panel);
+      color:var(--ink);
+      padding:0 14px;
+      font-size:1rem;
+      outline:none;
+      box-shadow:0 4px 12px rgba(38,34,24,.035);
+    }
+
+    input:focus, select:focus{
+      border-color:rgba(40,84,58,.55);
+      box-shadow:0 0 0 4px rgba(40,84,58,.12);
+    }
+
+    .settings-btn{
+      width:46px;
+      height:46px;
+      min-height:46px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:var(--panel);
+      color:var(--green);
+      padding:0;
+      font-size:1.25rem;
+      line-height:1;
+      font-weight:850;
+      cursor:pointer;
+      box-shadow:0 4px 12px rgba(38,34,24,.035);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .settings-btn:hover{
+      background:var(--green-2);
+    }
+
+    .settings-btn.open{
+      background:var(--green);
+      color:white;
+      border-color:var(--green);
+    }
+
+    .settings-panel{
+      display:none;
+      margin-top:12px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+    }
+
+    .settings-panel.open{
+      display:block;
+    }
+
+    .settings-grid{
+      display:grid;
+      grid-template-columns:minmax(180px, 260px) 1fr;
+      gap:12px;
+      align-items:center;
+    }
+
+    .settings-label{
+      font-weight:850;
+    }
+
+    .settings-help{
+      color:var(--muted);
+      font-size:.88rem;
+      margin-top:4px;
+    }
+
+    .tax-input-wrap{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .tax-input-wrap input{
+      max-width:140px;
+      text-align:right;
+    }
+
+    .percent-mark{
+      font-weight:900;
+      color:var(--muted);
+    }
+
+    .settings-actions{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:12px;
+      padding-top:12px;
+      border-top:1px solid var(--line);
+    }
+
+    .edit-mode-btn{
+      min-height:42px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:var(--panel);
+      color:var(--green);
+      padding:0 14px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .edit-mode-btn.active{
+      background:var(--green);
+      color:white;
+      border-color:var(--green);
+    }
+
+    main{padding:18px 0 48px}
+
+    .notice{
+      display:none;
+      background:var(--green-dark);
+      color:white;
+      border-radius:var(--radius);
+      padding:13px 16px;
+      box-shadow:var(--shadow);
+      margin-bottom:14px;
+      font-weight:850;
+    }
+
+    body.wholesale-active .notice{display:block}
+
+    .quick-bar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:14px;
+    }
+
+    .chip{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.8);
+      color:var(--ink);
+      border-radius:999px;
+      padding:9px 12px;
+      font-weight:850;
+      cursor:pointer;
+      box-shadow:0 5px 14px rgba(38,34,24,.045);
+    }
+
+    .chip.active{
+      border-color:rgba(40,84,58,.45);
+      background:var(--green);
+      color:white;
+    }
+
+    .category{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      margin-bottom:14px;
+    }
+
+    .category.common{
+      border-color:rgba(40,84,58,.35);
+      box-shadow:0 14px 34px rgba(40,84,58,.12);
+    }
+
+    .category-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      padding:14px 16px;
+      background:linear-gradient(to right, var(--green-2), #fff);
+      border-bottom:1px solid var(--line);
+    }
+
+    .category.common .category-head{
+      background:linear-gradient(to right, #dfece0, #fff);
+    }
+
+    .category-title{
+      margin:0;
+      font-size:1.05rem;
+      letter-spacing:-.01em;
+    }
+
+    .category-count{
+      color:var(--muted);
+      font-size:.86rem;
+      font-weight:750;
+      white-space:nowrap;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+    }
+
+    th{
+      text-align:left;
+      color:var(--muted);
+      background:var(--panel-2);
+      border-bottom:1px solid var(--line);
+      padding:10px 16px;
+      font-size:.72rem;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+    }
+
+    td{
+      padding:13px 16px;
+      border-bottom:1px solid #eee8dd;
+      vertical-align:middle;
+    }
+
+    tr:last-child td{border-bottom:0}
+
+    .item-name{
+      font-weight:760;
+      line-height:1.2;
+    }
+
+    .price{
+      text-align:right;
+      font-variant-numeric:tabular-nums;
+      font-weight:900;
+      font-size:1.05rem;
+      white-space:nowrap;
+    }
+
+    .retail-price{
+      text-align:right;
+      color:var(--muted);
+      font-variant-numeric:tabular-nums;
+      white-space:nowrap;
+    }
+
+    .edit-price-wrap{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:7px;
+      margin-top:6px;
+    }
+
+    .edit-price-input{
+      width:92px;
+      min-height:34px;
+      border-radius:11px;
+      text-align:right;
+      padding:0 8px;
+      font-size:.95rem;
+    }
+
+    .row-edit-btn{
+      min-height:34px;
+      border:1px solid var(--line);
+      border-radius:11px;
+      background:var(--panel);
+      color:var(--green);
+      padding:0 10px;
+      font-weight:900;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .row-edit-btn.save{
+      background:var(--green);
+      color:white;
+      border-color:var(--green);
+    }
+
+    .discount{
+      display:inline-flex;
+      margin-left:8px;
+      padding:2px 8px;
+      border-radius:999px;
+      color:var(--green);
+      background:var(--green-2);
+      border:1px solid #cbdccb;
+      font-size:.72rem;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .subprice{
+      display:block;
+      margin-top:3px;
+      color:var(--muted);
+      font-size:.84rem;
+      font-weight:700;
+    }
+
+    .calc-wrap{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:8px;
+    }
+
+    .qty{
+      width:92px;
+      min-height:38px;
+      text-align:right;
+      padding:0 10px;
+      border-radius:12px;
+    }
+
+    .line-total{
+      min-width:88px;
+      text-align:right;
+      font-weight:900;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .after-tax{
+      display:block;
+      margin-top:2px;
+      color:var(--muted);
+      font-size:.72rem;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+
+    .empty{
+      display:none;
+      padding:30px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      text-align:center;
+      color:var(--muted);
+    }
+
+    footer{
+      color:var(--muted);
+      font-size:.84rem;
+      padding-top:10px;
+    }
+
+    @media (max-width:860px){
+      .brand-row{display:block}
+      .header-actions{
+        align-items:stretch;
+        margin-top:14px;
+      }
+      .mode-card{min-width:0; width:100%}
+      .controls{grid-template-columns:1fr 46px}
+      .controls input{grid-column:1}
+      .settings-btn{grid-column:2}
+      .settings-grid{grid-template-columns:1fr}
+    }
+
+    @media (max-width:760px){
+      header{padding-top:16px}
+      table, tbody, tr, td{display:block}
+      thead{display:none}
+      tr{
+        padding:12px 14px;
+        border-bottom:1px solid #eee8dd;
+      }
+      tr:last-child{border-bottom:0}
+      td{
+        border:0;
+        padding:3px 0;
+      }
+      .price, .retail-price{text-align:left}
+      .price{font-size:1.2rem}
+      .retail-price{font-size:.92rem}
+      .retail-price::before{content:"Wholesale: "; font-weight:700}
+      .item-name{margin-bottom:6px}
+      .edit-price-wrap{
+        justify-content:flex-start;
+        margin-top:8px;
+      }
+      .calc-wrap{
+        justify-content:flex-start;
+        margin-top:8px;
+      }
+      .qty{width:120px}
+      .line-total{text-align:left}
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="shell">
+      <div class="brand-row">
+        <div>
+          <p class="eyebrow">Woodlands Earth &amp; Stone</p>
+          <h1>Price Book</h1>
+        </div>
+
+        <div class="header-actions">
+          <div class="mode-card" aria-label="Price mode">
+            <button id="retailBtn" class="active" type="button">Retail</button>
+            <button id="wholesaleBtn" type="button">Wholesale</button>
+            <button id="compareBtn" type="button">Compare</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <input id="searchInput" type="search" placeholder="Search products..." autocomplete="off">
+        <button id="settingsBtn" class="settings-btn icon-btn" type="button" aria-label="Settings" title="Settings">⚙</button>
+      </div>
+
+      <div id="settingsPanel" class="settings-panel">
+        <div class="settings-grid">
+          <div>
+            <div class="settings-label">Default calculator tax</div>
+            <div class="settings-help">Added only to row calculator totals. Prices shown in the list stay pre-tax.</div>
+          </div>
+          <div class="tax-input-wrap">
+            <input id="taxRateInput" type="number" inputmode="decimal" min="0" max="20" step="0.01" value="0" aria-label="Default calculator tax rate">
+            <span class="percent-mark">%</span>
+          </div>
+        </div>
+        <div class="settings-actions">
+          <button id="editModeBtn" class="edit-mode-btn" type="button">Edit prices</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="notice">Wholesale active: stone/sand 5% off · mulch/topsoil 10% off</div>
+
+    <div class="quick-bar" id="quickBar" aria-label="Quick filters"></div>
+
+    <div id="emptyState" class="empty">No matching products found.</div>
+    <div id="priceBook"></div>
+
+    <footer>
+      Product data is stored in the PRODUCTS array near the bottom of this file. Edit that list to update names, prices, or categories.
+    </footer>
+  </main>
+
+  <script>
+    const PRODUCTS = [
+      {category:"General Material", item:"Screened Topsoil", price:43.00, unit:"cu yd", group:"mulchTopsoil", common:true},
+      {category:"General Material", item:"Brown/Black Mulch", price:41.00, unit:"cu yd", group:"mulchTopsoil", common:true},
+      {category:"General Material", item:"50/50 Soil Mix", price:45.00, unit:"cu yd", group:"mulchTopsoil", common:true},
+      {category:"General Material", item:"Leaf Compost", price:49.00, unit:"cu yd", group:"mulchTopsoil"},
+      {category:"General Material", item:"1/2″ Crusher Run", price:38.35, unit:"tn", group:"stoneSand", common:true},
+      {category:"General Material", item:"1″ Crusher Run", price:38.35, unit:"tn", group:"stoneSand", common:true},
+      {category:"General Material", item:"2″ Crusher Run", price:34.95, unit:"tn", group:"stoneSand"},
+      {category:"General Material", item:"Clean 1's", price:44.50, unit:"tn", group:"stoneSand"},
+      {category:"General Material", item:"Clean 2's", price:44.50, unit:"tn", group:"stoneSand"},
+      {category:"General Material", item:"Surge Stone", price:38.95, unit:"tn", group:"stoneSand"},
+      {category:"General Material", item:"Washed 1AS", price:46.25, unit:"tn", group:"stoneSand"},
+      {category:"General Material", item:"Screenings", price:32.95, unit:"tn", group:"stoneSand"},
+      {category:"General Material", item:"Pea Gravel/1As", price:44.25, unit:"tn", group:"stoneSand", common:true},
+      {category:"General Material", item:"7 Springs 1&2's", price:56.00, unit:"tn", group:"stoneSand"},
+      {category:"General Material", item:"7 Springs 3&4's", price:53.00, unit:"tn", group:"stoneSand"},
+      {category:"General Material", item:"Concrete Sand", price:48.75, unit:"tn", group:"stoneSand"},
+      {category:"General Material", item:"Mason Sand", price:52.25, unit:"tn", group:"stoneSand", common:true},
+      {category:"General Material", item:"Screened Sand", price:29.50, unit:"tn", group:"stoneSand"},
+      {category:"General Material", item:"3/8″ Minus Sand", price:35.50, unit:"tn", group:"stoneSand"},
+
+      {category:"Decorative Stones", item:"2″ Red River Rock", price:56.00, unit:"tn", group:"stoneSand", common:true},
+      {category:"Decorative Stones", item:"Tailings", price:56.00, unit:"tn", group:"stoneSand"},
+      {category:"Decorative Stones", item:"Small Sand Dune Gravel", price:53.00, unit:"tn", group:"stoneSand"},
+      {category:"Decorative Stones", item:"O/S Sand Dune Gravel", price:46.95, unit:"tn", group:"stoneSand"},
+      {category:"Decorative Stones", item:"Carbon Granite 1″", price:141.00, unit:"tn", group:"stoneSand"},
+      {category:"Decorative Stones", item:"Carbon Granite 1″-2″", price:141.00, unit:"tn", group:"stoneSand"},
+      {category:"Decorative Stones", item:"Frost White", price:260.00, unit:"tn", group:"stoneSand"},
+      {category:"Decorative Stones", item:"Zebra Stone", price:124.00, unit:"tn", group:"stoneSand"},
+      {category:"Decorative Stones", item:"New Jersey Cream", price:218.00, unit:"tn", group:"stoneSand"},
+      {category:"Decorative Stones", item:"Midnight Black", price:216.00, unit:"tn", group:"stoneSand"},
+      {category:"Decorative Stones", item:"Desert Fire", price:139.00, unit:"tn", group:"stoneSand"},
+      {category:"Decorative Stones", item:"Rosy Pink", price:209.00, unit:"tn", group:"stoneSand"},
+      {category:"Decorative Stones", item:"Ruby Granite", price:103.00, unit:"tn", group:"stoneSand"},
+      {category:"Decorative Stones", item:"Bella Red Crushed Stone", price:94.50, unit:"tn", group:"stoneSand"},
+
+      {category:"Rocks & Boulders", item:"Glacier Boulders", price:.55, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Sponge Boulders", price:.55, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Black Ice Boulders", price:.55, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Green Marble Boulder", price:.40, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"NY Skippers", price:.45, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Kewanee Skipper Sm", price:.85, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Kewanee Skipper Lg", price:.75, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Elite Blue Irr Gran Slab", price:.35, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Saratoga Granite", price:.45, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"7/Springs Sm Boulders", price:.35, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"7/Springs Lg Boulders", price:.40, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"NY Cobbles Lilac", price:.45, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"NY Cobbles Brown", price:.45, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"NY Cobbles", price:.35, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Granite Cobbles", price:.30, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Mexican Beach Pebble", price:.75, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"PA Fieldstone Boulder", price:.30, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"West Mountain Boulder", price:.35, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Swiss Sparkle Garden Path", price:.55, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Chocolate Grey Garden Path", price:.55, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Variegated Gray Boulder", price:400.00, unit:"Each", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Floral Pink Boulders (Large)", price:400.00, unit:"Each", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Zebra Boulder (Large)", price:350.00, unit:"Each", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"White Boulder (Large)", price:350.00, unit:"Each", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"NJ Cream Boulder (Medium)", price:100.00, unit:"Each", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Floral Pink Boulder (Medium)", price:150.00, unit:"Each", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Floral Pink Boulder (Small)", price:.80, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"White Boulder (Small)", price:.75, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Zebra Boulder (Small)", price:.75, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Autumn Red Boulder (Small)", price:.60, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"NJ Cream Boulder (Small)", price:.60, unit:"lb", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Re-Purposed Cobble Stone", price:3.00, unit:"Each", group:"stoneSand"},
+      {category:"Rocks & Boulders", item:"Natural Bluestone 12 x 12", price:11.00, unit:"Each", group:"stoneSand"},
+
+      {category:"Palletized Stone", item:"West Mountain Wallstone", price:.25, unit:"lb", alt:"$370/PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"PA Fieldstone Wallstone", price:.25, unit:"lb", alt:"$402/PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Colonial Lilac Wallstone", price:.25, unit:"lb", alt:"$290/PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Colonial Wallstone", price:.25, unit:"lb", alt:"$290/PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Rustic Tumble Garden Path", price:.40, unit:"lb", alt:"$541/PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Iceland Tumbled Bluestone", price:.40, unit:"lb", alt:"$445/PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Iceland Tumble Brownstone", price:.40, unit:"lb", alt:"$445/PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Creekstone Wallstone", price:.30, unit:"lb", alt:"$395/PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Mocha Brown Wallstone", price:.35, unit:"lb", alt:"$414/PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Delaware Valley Blend", price:.35, unit:"lb", alt:"$484/PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Snapped Colonial Wallstone", price:.25, unit:"lb", alt:"$295/PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Seneca Curbing", price:.45, unit:"lb", alt:"$980/PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Guillotine Boulders", price:890.00, unit:"PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"West Mt. Wallstone (Half)", price:274.00, unit:"Half PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"PA Fieldstone (Half)", price:294.00, unit:"Half PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Colonial Wallstone (Half)", price:189.00, unit:"Half PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Col. Lilac Wallstone (Half)", price:204.00, unit:"Half PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Icelandic Bluestone (Half)", price:282.00, unit:"Half PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Creekstone (Half)", price:226.00, unit:"Half PAL", group:"stoneSand"},
+      {category:"Palletized Stone", item:"Snapped Col. Wallstone (Half)", price:189.00, unit:"Half PAL", group:"stoneSand"},
+
+      {category:"Palletized Flagstone", item:"Standup PA Flag .75″-1″", price:.35, unit:"lb", alt:"$525/PAL", group:"stoneSand"},
+      {category:"Palletized Flagstone", item:"Standup PA Flag 1″-2.25″", price:.35, unit:"lb", alt:"$535/PAL", group:"stoneSand"},
+      {category:"Palletized Flagstone", item:"Standup Lilac Flag .75″-1″", price:.35, unit:"lb", alt:"$525/PAL", group:"stoneSand"},
+      {category:"Palletized Flagstone", item:"Standup Lilac Flag 1″-2.25″", price:.35, unit:"lb", alt:"$542/PAL", group:"stoneSand"},
+      {category:"Palletized Flagstone", item:"True Blue Flagstone 1″-2.25″", price:855.00, unit:"PAL", group:"stoneSand"},
+      {category:"Palletized Flagstone", item:"Stand PA Flagstone (Half)", price:394.00, unit:"Half PAL", group:"stoneSand"},
+      {category:"Palletized Flagstone", item:"Stand Lilac Flagstone (Half)", price:415.00, unit:"Half PAL", group:"stoneSand"},
+
+      {category:"Stackable Limestone", item:"Stackable Limestone", price:181.00, unit:"tn", group:"stoneSand"}
+    ];
+
+    const QUICK_FILTERS = [
+      {label:"All", value:"all"},
+      {label:"Common", value:"common"},
+      {label:"Mulch & Topsoil", value:"mulchTopsoil"},
+      {label:"Bulk Stone/Sand", value:"bulkStoneSand"},
+      {label:"Decorative", value:"Decorative Stones"},
+      {label:"Boulders", value:"Rocks & Boulders"},
+      {label:"Palletized", value:"palletized"}
+    ];
+
+    const DISCOUNTS = { stoneSand: .05, mulchTopsoil: .10, none: 0 };
+
+    let mode = "retail";
+    let quickFilter = "all";
+    let taxRate = parseFloat(localStorage.getItem("woodlandsTaxRate") || "0") || 0;
+    let editMode = false;
+    let editingKey = null;
+    let priceOverrides = JSON.parse(localStorage.getItem("woodlandsPriceOverrides") || "{}");
+
+    const priceBook = document.getElementById("priceBook");
+    const emptyState = document.getElementById("emptyState");
+    const searchInput = document.getElementById("searchInput");
+    const quickBar = document.getElementById("quickBar");
+    const settingsBtn = document.getElementById("settingsBtn");
+    const settingsPanel = document.getElementById("settingsPanel");
+    const taxRateInput = document.getElementById("taxRateInput");
+    const editModeBtn = document.getElementById("editModeBtn");
+    const retailBtn = document.getElementById("retailBtn");
+    const wholesaleBtn = document.getElementById("wholesaleBtn");
+    const compareBtn = document.getElementById("compareBtn");
+
+    function productKey(product){
+      return `${product.category}|${product.item}|${product.unit}`;
+    }
+
+    function getPrice(product){
+      const key = productKey(product);
+      return Number.isFinite(priceOverrides[key]) ? priceOverrides[key] : product.price;
+    }
+
+    function savePrice(product, value){
+      const key = productKey(product);
+      priceOverrides[key] = value;
+      localStorage.setItem("woodlandsPriceOverrides", JSON.stringify(priceOverrides));
+    }
+
+    function discountFor(product){
+      return mode !== "retail" ? (DISCOUNTS[product.group] || 0) : 0;
+    }
+
+    function wholesalePrice(product){
+      return getPrice(product) * (1 - (DISCOUNTS[product.group] || 0));
+    }
+
+    function money(value, unit){
+      return "$" + value.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }) + "/" + unit;
+    }
+
+    function priceHTML(product, type = "current"){
+      let value = getPrice(product);
+      if(type === "wholesale" || (type === "current" && mode === "wholesale")) value = wholesalePrice(product);
+      const alt = product.alt ? `<span class="subprice">or ${product.alt}</span>` : "";
+      return `${money(value, product.unit)}${alt}`;
+    }
+
+    function lineTotal(product, qty){
+      if(!qty || qty <= 0) return "";
+      const price = mode === "retail" || mode === "compare" ? getPrice(product) : wholesalePrice(product);
+      const subtotal = price * qty;
+      const tax = subtotal * (taxRate / 100);
+      const total = subtotal + tax;
+
+      const formatted = "$" + total.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
+      return taxRate > 0 ? `${formatted} <span class="after-tax">after tax</span>` : formatted;
+    }
+
+    function groupByCategory(products){
+      return products.reduce((map, product) => {
+        if(!map.has(product.category)) map.set(product.category, []);
+        map.get(product.category).push(product);
+        return map;
+      }, new Map());
+    }
+
+    function passesQuick(product){
+      if(quickFilter === "all") return true;
+      if(quickFilter === "common") return product.common;
+      if(quickFilter === "mulchTopsoil") return product.group === "mulchTopsoil";
+      if(quickFilter === "bulkStoneSand") return product.category === "General Material" && product.group === "stoneSand";
+      if(quickFilter === "palletized") return product.category.includes("Palletized") || product.unit.includes("PAL");
+      return product.category === quickFilter;
+    }
+
+    function filteredProducts(){
+      const q = searchInput.value.trim().toLowerCase();
+      return PRODUCTS.filter(product => {
+        const text = `${product.item} ${product.category} ${product.unit}`.toLowerCase();
+        return (!q || text.includes(q)) && passesQuick(product);
+      });
+    }
+
+    function renderQuickFilters(){
+      quickBar.innerHTML = QUICK_FILTERS.map(filter => `
+        <button class="chip ${quickFilter === filter.value ? "active" : ""}" type="button" data-filter="${filter.value}">
+          ${filter.label}
+        </button>
+      `).join("");
+
+      quickBar.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => {
+          quickFilter = button.dataset.filter;
+          render();
+        });
+      });
+    }
+
+    function render(){
+      document.body.classList.toggle("wholesale-active", mode === "wholesale");
+      document.body.classList.toggle("compare-active", mode === "compare");
+      const products = filteredProducts();
+      const grouped = groupByCategory(products);
+
+      priceBook.innerHTML = "";
+      emptyState.style.display = products.length ? "none" : "block";
+
+      retailBtn.classList.toggle("active", mode === "retail");
+      wholesaleBtn.classList.toggle("active", mode === "wholesale");
+      compareBtn.classList.toggle("active", mode === "compare");
+      editModeBtn.classList.toggle("active", editMode);
+      editModeBtn.textContent = editMode ? "Done editing" : "Edit prices";
+
+      renderQuickFilters();
+
+      if(quickFilter === "common" && products.length){
+        renderSection("Common Items", products, true);
+        return;
+      }
+
+      for(const [category, items] of grouped){
+        renderSection(category, items, false);
+      }
+    }
+
+    function renderSection(category, items, isCommon){
+      const section = document.createElement("section");
+      section.className = "category" + (isCommon ? " common" : "");
+
+      const secondHeader = mode === "compare" ? "Retail" : mode === "retail" ? "Price" : "Wholesale";
+      const thirdHeader = mode === "compare" ? "Wholesale" : `Calculator${taxRate ? " + Tax" : ""}`;
+
+      section.innerHTML = `
+        <div class="category-head">
+          <h2 class="category-title">${category}</h2>
+          <div class="category-count">${items.length} item${items.length === 1 ? "" : "s"}</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:48%">Product</th>
+              <th style="width:24%; text-align:right">${secondHeader}</th>
+              <th style="width:28%; text-align:right">${thirdHeader}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map((product, index) => {
+              const discount = DISCOUNTS[product.group] || 0;
+              const discountLabel = discount ? `<span class="discount">${Math.round(discount * 100)}% off</span>` : "";
+              const key = productKey(product);
+              const retailCell = priceHTML(product, "retail");
+              const wholesaleCell = priceHTML(product, "wholesale");
+              const secondCell = mode === "wholesale" ? wholesaleCell : retailCell;
+              const editing = editMode && editingKey === key;
+              const editControls = editMode ? `
+                <div class="edit-price-wrap">
+                  ${editing ? `<input class="edit-price-input" type="number" inputmode="decimal" min="0" step="0.01" value="${getPrice(product).toFixed(2)}" data-edit-key="${key}">` : ""}
+                  <button class="row-edit-btn ${editing ? "save" : ""}" type="button" data-action="${editing ? "save" : "edit"}" data-edit-key="${key}">
+                    ${editing ? "Save" : "Edit"}
+                  </button>
+                </div>
+              ` : "";
+              const thirdCell = mode === "compare" ? wholesaleCell : `<div class="calc-wrap"><input class="qty" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Qty" data-key="${category}-${index}"><span class="line-total"></span></div>`;
+              return `
+                <tr>
+                  <td>
+                    <div class="item-name">${product.item}</div>
+                    ${mode === "wholesale" ? discountLabel : ""}
+                  </td>
+                  <td class="price">${secondCell}${editControls}</td>
+                  <td class="${mode === "compare" ? "retail-price" : ""}">${thirdCell}</td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      `;
+
+      priceBook.appendChild(section);
+
+      section.querySelectorAll(".qty").forEach(input => {
+        input.addEventListener("input", () => {
+          const row = input.closest("tr");
+          const itemName = row.querySelector(".item-name").textContent;
+          const product = PRODUCTS.find(p => p.item === itemName);
+          const target = row.querySelector(".line-total");
+          target.innerHTML = lineTotal(product, parseFloat(input.value));
+        });
+      });
+
+      section.querySelectorAll(".row-edit-btn").forEach(button => {
+        button.addEventListener("click", () => {
+          const key = button.dataset.editKey;
+          const product = PRODUCTS.find(p => productKey(p) === key);
+
+          if(button.dataset.action === "edit"){
+            editingKey = key;
+            render();
+            return;
+          }
+
+          const input = document.querySelector(`.edit-price-input[data-edit-key="${CSS.escape(key)}"]`);
+          const nextPrice = parseFloat(input.value);
+          if(Number.isFinite(nextPrice) && nextPrice >= 0){
+            savePrice(product, nextPrice);
+          }
+
+          editingKey = null;
+          render();
+        });
+      });
+    }
+
+    function setMode(next){
+      mode = next;
+      render();
+    }
+
+    function init(){
+      taxRateInput.value = taxRate;
+
+      settingsBtn.addEventListener("click", () => {
+        const isOpen = settingsPanel.classList.toggle("open");
+        settingsBtn.classList.toggle("open", isOpen);
+      });
+
+      taxRateInput.addEventListener("input", () => {
+        const next = Math.max(0, parseFloat(taxRateInput.value) || 0);
+        taxRate = next;
+        localStorage.setItem("woodlandsTaxRate", String(taxRate));
+        render();
+      });
+
+      editModeBtn.addEventListener("click", () => {
+        editMode = !editMode;
+        editingKey = null;
+        render();
+      });
+
+      retailBtn.addEventListener("click", () => setMode("retail"));
+      wholesaleBtn.addEventListener("click", () => setMode("wholesale"));
+      compareBtn.addEventListener("click", () => setMode("compare"));
+      searchInput.addEventListener("input", render);
+
+      render();
+    }
+
+    init();
+  </script>
+</body>
+</html>
